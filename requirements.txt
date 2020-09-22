@@ -1,0 +1,5 @@
+pymongo
+pandas
+matplotlib
+numpy
+pytdx
