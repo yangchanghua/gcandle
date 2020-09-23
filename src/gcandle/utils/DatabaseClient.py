@@ -3,11 +3,11 @@ import json
 import pandas as pd
 import pymongo
 import gcandle.utils.date_time_utils as date_time_utils
+from gcandle.utils.gcandle_config import GCANDLE_CONFIG
 
 READ_BATCH_SIZE = 100000
 DEFAULT_PRECISION = 5
-MONGO_URI = 'mongodb://localhost:27017'
-DATABASE_NAME = 'gcandle'
+
 
 
 def to_json(data):
@@ -22,15 +22,17 @@ def to_json(data):
 class DatabaseClient:
     def __init__(self):
         self.client: pymongo.MongoClient = None
+        self.mongo_uri = GCANDLE_CONFIG.mongodb_uri
+        self.db_name = GCANDLE_CONFIG.mongodb_name
 
     def set_real_client(self, client):
         self.client = client
 
     def get_mongo_connection(self):
-        return pymongo.MongoClient(MONGO_URI)
+        return pymongo.MongoClient(self.mongo_uri)
 
     def get_database(self):
-        return self.get_mongo_connection()[DATABASE_NAME]
+        return self.get_mongo_connection()[self.db_name]
 
     # Multiprocess init can call this function so that every process have their own mongodb connection.
     def init(self):

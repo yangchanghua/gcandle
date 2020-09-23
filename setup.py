@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gcandle", # Replace with your own username
-    version="0.0.1",
+    version="0.0.3",
     author="ych",
     author_email="yangchanghua@gmail.com",
     description="A library for quant trade",
@@ -21,4 +21,11 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=[
+        "pandas",
+        "numpy",
+        "pymongo",
+        "matplotlib",
+        "pytdx"
+    ],
 )
