@@ -24,7 +24,7 @@ class BuyStrategy:
         return data
 
     def get_price_func(self):
-        return self._buy_filter_func
+        return self._price_func
 
     def set_filter_on_buy_day(self, filter_func):
         self._buy_filter_func = filter_func
