@@ -8,7 +8,7 @@ from gcandle.core.sell_strategy.CombinedSellStrategy import CombinedSellStrategy
 from gcandle.core.buy_strategy.BuyStrategy import BuyStrategy
 from gcandle.core.common_types import ORDER_DIRECTION
 
-DEFAULT_CASH=100000
+DEFAULT_CASH = 100000
 
 
 class DayBarBacktest:
@@ -16,8 +16,8 @@ class DayBarBacktest:
         self.name = name
         self.data = None
         self.init_cash = DEFAULT_CASH
-        self.buy_strategy : BuyStrategy = None
-        self.sell_strategy : CombinedSellStrategy = None
+        self.buy_strategy: BuyStrategy = None
+        self.sell_strategy: CombinedSellStrategy = None
 
     def set_data(self, data):
         self.data = data
@@ -72,7 +72,7 @@ class DayBarBacktest:
         arr.append(item.close)
 
     def output_order_stats(self):
-        tt = pd.DataFrame(self.orders, columns=['date', 'code', 'blow', 'bpr', 'spr',  'shigh', 'sdate'])
+        tt = pd.DataFrame(self.orders, columns=['date', 'code', 'blow', 'bpr', 'spr', 'shigh', 'sdate'])
         tt['profit'] = tt.spr / tt.bpr
         tt['win'] = tt.profit >= 1.03
         tt['loss'] = (tt.win == False) & (tt.profit <= 0.97)
@@ -173,6 +173,9 @@ class DayBarBacktest:
         AC.settle(data)
 
     def run(self, y, yy, m=1, mm=12, sell_first=False, extra_filter=False, silent=False):
+        if not self._ready_to_run():
+            print('Exit now.')
+            return
         bg = time.time()
         self.init_account(self.init_cash)
         self.sell_first = sell_first
@@ -228,3 +231,14 @@ class DayBarBacktest:
         print(bottom_hist.to_html(), file=f)
         f.close()
 
+    def _ready_to_run(self):
+        if self.data is None:
+            print('No data is set for backtest')
+            return False
+        if self.buy_strategy is None:
+            print('Buy strategy is not set yet.')
+            return False
+        if self.sell_strategy is None:
+            print('Sell strategy is not set yet.')
+            return False
+        return True

@@ -155,9 +155,12 @@ class BacktestAccount:
         return data.high >= order_price >= data.low
 
     def exclude_yi_zi_ban_up(self, data):
-        f = data.close / data.pc > 1
-        f &= (data.low == data.high)
-        return data.loc[~f]
+        if 'pc' in data.columns:
+            f = data.close / data.pc > 1
+            f &= (data.low == data.high)
+            return data.loc[~f]
+        else:
+            return data
 
     def batch_buy(self, data, price_func, max_ratio=1.0):
         cash_today = self.cash_available
