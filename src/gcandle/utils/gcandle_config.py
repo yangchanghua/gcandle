@@ -29,9 +29,11 @@ class GcandleConfig:
         try:
             with open(CONFIG_FILE, 'r') as config_file:
                 data = json.load(config_file)
-                print(data)
-                self.mongodb_uri = data['mongodb_uri']
-                self.mongodb_name = data['mongodb_name']
+                print("Config data: {}".format(data))
+                if "mongodb_uri" in data:
+                    self.mongodb_uri = data['mongodb_uri']
+                if "mongodb_name" in data:
+                    self.mongodb_name = data['mongodb_name']
         except Exception as e:
             print('Failed to open config file {} with error: {}'
                   .format(CONFIG_FILE, e))
