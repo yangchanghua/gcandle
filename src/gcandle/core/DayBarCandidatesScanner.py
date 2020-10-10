@@ -23,10 +23,11 @@ class DayBarCandidatesScanner:
 
     def scan(self, argv):
         if len(argv) > 1:
+            codes = self.master_service.read_all_codes()
             end = argv[1]
             start = Date(end).get_before(DAYS_BEFORE_TO_SCAN).as_str()
             print('## Scan {} candidates with backtest data from {} to {}'.format(self.name, start, end))
-            data = self.master_service.read_with_slave_for_backtest(start, end=end)
+            data = self.master_service.read_with_slave_for_backtest(codes, start, end=end)
         else:
             print('## Scan {} candidates for trade'.format(self.name))
             data = self.master_service.read_with_slave_for_trade()
