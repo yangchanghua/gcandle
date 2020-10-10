@@ -22,17 +22,15 @@ def to_json(data):
 class DatabaseClient:
     def __init__(self):
         self.client: pymongo.MongoClient = None
-        self.mongo_uri = GCANDLE_CONFIG.mongodb_uri
-        self.db_name = GCANDLE_CONFIG.mongodb_name
 
     def set_real_client(self, client):
         self.client = client
 
     def get_mongo_connection(self):
-        return pymongo.MongoClient(self.mongo_uri)
+        return pymongo.MongoClient(GCANDLE_CONFIG.mongodb_uri)
 
     def get_database(self):
-        return self.get_mongo_connection()[self.db_name]
+        return self.get_mongo_connection()[GCANDLE_CONFIG.mongodb_name]
 
     # Multiprocess init can call this function so that every process have their own mongodb connection.
     def init(self):
@@ -41,7 +39,7 @@ class DatabaseClient:
 
     def ensure_client(self):
         if self.client is None:
-            raise Exception("Not initialized properly, underline database connection is None")
+            self.init()
 
     def create_index(self, repo_name, keys_list):
         self.ensure_client()
