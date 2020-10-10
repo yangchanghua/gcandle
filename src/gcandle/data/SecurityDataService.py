@@ -87,12 +87,12 @@ class SecurityDataService:
         executor.execute_tasks(codes, self.do_fetch_and_replace_by_dates, typ, start, end, freq)
         print("These codes failed to update: [" + ','.join(self.failed_codes) + "]")
 
-    def update_bars(self, typ: SeType=SeType.Stock, freq: SeFreq = SeFreq.DAY, codes=None):
+    def update_bars(self, typ: SeType=SeType.Stock, freq: SeFreq = SeFreq.DAY, codes=None, days_to_update=DAYS_TO_UPDATE):
         DB_CLIENT.create_index(typ.repo_name(freq), freq.keys_to_index())
         if codes is None:
             codes = self.read_security_codes(typ)
         end = date_time_utils.Date()
-        start = end.get_before(DAYS_TO_UPDATE)
+        start = end.get_before(days_to_update)
         executor.execute_tasks(codes, self.do_fetch_and_save_bars, typ, start.as_str(), end.as_str(), freq)
         print("These codes failed to update: [" + ','.join(self.failed_codes) + "]")
 
