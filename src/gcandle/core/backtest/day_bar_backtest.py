@@ -1,3 +1,4 @@
+import logging
 import time
 import numpy as np
 import pandas as pd
@@ -123,7 +124,7 @@ class DayBarBacktest:
             return
         data = data.loc[data.code.isin(sellable)].copy()
         if len(data) <= 0:
-            print("{} No data for sell, sellable = {}".format(today, sellable))
+            logging.debug("{} No data for sell, sellable = {}".format(today, sellable))
             return
         hold_days = data.apply(self.get_active_position_days, axis=1)
         data['hold_days'] = hold_days
