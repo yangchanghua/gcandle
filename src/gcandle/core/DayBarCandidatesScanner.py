@@ -54,11 +54,11 @@ class DayBarCandidatesScanner:
             print('No candidates on {}'.format(next_trade_day))
 
     def __smart_buy_ratio(self, n):
-        r = 0.35
-        if n > 20:
-            r = 0.25
-        elif n > 40:
-            r = 0.2
+        r = 0.7
+        if n > 50:
+            r = 0.5
+        elif n > 100:
+            r = 0.3
         return r
 
     def __save_candidates(self, data, next_day):
