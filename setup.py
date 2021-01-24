@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gcandle", # Replace with your own username
-    version="0.0.8",
+    version="0.0.9",
     author="ych",
     author_email="yangchanghua@gmail.com",
     description="A library for quant trade",
