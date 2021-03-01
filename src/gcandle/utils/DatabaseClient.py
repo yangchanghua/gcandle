@@ -9,7 +9,6 @@ READ_BATCH_SIZE = 100000
 DEFAULT_PRECISION = 5
 
 
-
 def to_json(data):
     if 'date' in data.columns:
         data.date = data.date.apply(lambda x: str(x)[0:10])
