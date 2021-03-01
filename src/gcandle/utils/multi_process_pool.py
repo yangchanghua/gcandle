@@ -4,15 +4,8 @@ from time import time
 
 DEFAULT_POOL_SIZE = 8
 
-
 def pool_init():
     DB_CLIENT.init()
-
-
-def foo(*args):
-    print('foo: ', len(args))
-    print(args)
-    print(*args)
 
 
 def execute_tasks(code_list, task_func, *args):
