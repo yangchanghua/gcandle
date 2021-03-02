@@ -18,32 +18,14 @@ def to_json(data):
     return json_data
 
 
-class DatabaseClient:
+class SecurityDataRepository:
     def __init__(self):
-        self.connection = pymongo.MongoClient = None
         self.client: pymongo.MongoClient = None
 
-    def set_real_client(self, client):
+    def set_client(self, client):
         self.client = client
 
-    def connect(self):
-        self.connection = pymongo.MongoClient(GCANDLE_CONFIG.mongodb_uri)
-
-    def get_database(self, name=GCANDLE_CONFIG.mongodb_name):
-        return self.connection[name]
-
-    # Multiprocess init can call this function so that every process have their own mongodb connection.
-    def init(self):
-        self.connect()
-        self.client = self.get_database()
-        return self
-
-    def ensure_client(self):
-        if self.client is None:
-            self.init()
-
     def create_index(self, repo_name, keys_list):
-        self.ensure_client()
         coll = self.client[repo_name]
         if len(keys_list) > 0:
             for k in keys_list:
@@ -52,7 +34,6 @@ class DatabaseClient:
             print('No keys provided for creating index, NOOP')
 
     def create_index_for_update_time(self, repo_name):
-        self.ensure_client()
         coll = self.client[repo_name]
         coll.create_index(
             [
@@ -61,7 +42,6 @@ class DatabaseClient:
         )
 
     def create_index_for_collection_with_date_and_code(self, repo_name):
-        self.ensure_client()
         coll = self.client[repo_name]
         coll.create_index(
             [
@@ -86,7 +66,6 @@ class DatabaseClient:
         )
 
     def count_of(self, repo_name, query = None):
-        self.ensure_client()
         if query is not None:
             cnt = self.client[repo_name].count_documents(query)
         else:
@@ -94,7 +73,6 @@ class DatabaseClient:
         return cnt
 
     def replace_data_with_its_date_range(self, data, repo_name, precision=DEFAULT_PRECISION):
-        self.ensure_client()
         if data is None or len(data) < 1:
             return
         data = data.round(precision).reset_index()
@@ -105,7 +83,6 @@ class DatabaseClient:
         self._insert_data(data, repo_name)
 
     def replace_data_by_date_range(self, data, repo_name, start, end, precision=DEFAULT_PRECISION):
-        self.ensure_client()
         if data is None or len(data) < 1:
             return
         data = data.round(precision).reset_index()
@@ -125,7 +102,6 @@ class DatabaseClient:
         return coll.insert_many(to_json(data))
 
     def replace_data_by_codes(self, data, repo_name, precision=DEFAULT_PRECISION):
-        self.ensure_client()
         if data is None or len(data) < 1:
             return
         data = data.round(precision).reset_index()
@@ -137,7 +113,6 @@ class DatabaseClient:
             return coll.insert_many(to_json(data))
 
     def update_data_append_newer(self, data, repo_name, precision=DEFAULT_PRECISION):
-        self.ensure_client()
         if data is None or len(data) < 1:
             return
         data = data.round(precision).reset_index()
@@ -158,13 +133,11 @@ class DatabaseClient:
             self.client[repo_name].insert_many(to_json(data))
 
     def read_codes_from_db(self, repo_name, filter=None):
-        self.ensure_client()
         db = self.client[repo_name]
         res = db.distinct('code', filter=filter)
         return res
 
     def construct_dataframe(self, cursor):
-        self.ensure_client()
         res = pd.DataFrame([item for item in cursor])
         if res.shape[0] < 1:
             return None
@@ -183,7 +156,6 @@ class DatabaseClient:
         return res
 
     def read_all_data(self, repo_name):
-        self.ensure_client()
         coll = self.client[repo_name]
         cursor = coll.find({}, {'_id': 0}, batch_size=READ_BATCH_SIZE)
         return self.construct_dataframe(cursor)
@@ -217,7 +189,6 @@ class DatabaseClient:
     def read_max_date_for(
             self, code, repo_name
             ):
-        self.ensure_client()
         repo = self.client[repo_name]
         cnt = repo.count_documents({'code': code})
         if cnt < 1:
@@ -226,7 +197,6 @@ class DatabaseClient:
         return end[0:10]
 
     def remove_all_from(self, repo_name, query=None):
-        self.ensure_client()
         repo = self.client[repo_name]
         if query is None:
             repo.drop()
@@ -234,7 +204,6 @@ class DatabaseClient:
             repo.remove(query)
 
     def drop(self, repo_name):
-        self.ensure_client()
         repo = self.client[repo_name]
         repo.drop()
 
