@@ -4,6 +4,7 @@ import pandas as pd
 import pymongo
 import gcandle.utils.date_time_utils as date_time_utils
 from gcandle.utils.gcandle_config import GCANDLE_CONFIG
+from gcandle.utils.DatabaseClient import DatabaseClient
 
 READ_BATCH_SIZE = 100000
 DEFAULT_PRECISION = 5
@@ -20,13 +21,23 @@ def to_json(data):
 
 class SecurityDataRepository:
     def __init__(self):
-        self.client: pymongo.MongoClient = None
+        self.client: DatabaseClient = None
+        self.databaseName = GCANDLE_CONFIG.mongodb_name
+        self.mongo_client: pymongo.MongoClient = None
 
-    def set_client(self, client):
+    def set_client(self, client: DatabaseClient):
         self.client = client
 
+    def set_databaseName(self, databaseName):
+        self.databaseName = databaseName
+        return self
+
+    def connect(self):
+        self.client.init(self.databaseName)
+        self.mongo_client = self.client.get_database(self.databaseName)
+
     def create_index(self, repo_name, keys_list):
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         if len(keys_list) > 0:
             for k in keys_list:
                 coll.create_index([(k, pymongo.DESCENDING)])
@@ -34,7 +45,7 @@ class SecurityDataRepository:
             print('No keys provided for creating index, NOOP')
 
     def create_index_for_update_time(self, repo_name):
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         coll.create_index(
             [
                 ('update_time', pymongo.DESCENDING)
@@ -42,7 +53,7 @@ class SecurityDataRepository:
         )
 
     def create_index_for_collection_with_date_and_code(self, repo_name):
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         coll.create_index(
             [
                 ('code', pymongo.ASCENDING),
@@ -67,9 +78,9 @@ class SecurityDataRepository:
 
     def count_of(self, repo_name, query = None):
         if query is not None:
-            cnt = self.client[repo_name].count_documents(query)
+            cnt = self.mongo_client[repo_name].count_documents(query)
         else:
-            cnt = self.client[repo_name].count_documents({})
+            cnt = self.mongo_client[repo_name].count_documents({})
         return cnt
 
     def replace_data_with_its_date_range(self, data, repo_name, precision=DEFAULT_PRECISION):
@@ -91,13 +102,13 @@ class SecurityDataRepository:
         self._insert_data(data, repo_name)
 
     def delete_by_code_and_dates(self, repo_name, code, start, end):
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         coll.delete_many({'code': {'$in': [code]}, 'date': {
             '$gte': start, '$lte': end
         }})
 
     def _insert_data(self, data, repo_name):
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         data['update_time'] = date_time_utils.Date().as_str_with_time()
         return coll.insert_many(to_json(data))
 
@@ -106,7 +117,7 @@ class SecurityDataRepository:
             return
         data = data.round(precision).reset_index()
         codes = data.code.unique().tolist()
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         coll.delete_many({'code': {'$in': codes}})
         if len(data) != 0:
             data['update_time'] = date_time_utils.Date().as_str_with_time()
@@ -130,10 +141,10 @@ class SecurityDataRepository:
         if data is not None and len(data) > 0:
             data['update_time'] = date_time_utils.Date().as_str_with_time()
             data.drop(columns=[keep_flag], inplace=True)
-            self.client[repo_name].insert_many(to_json(data))
+            self.mongo_client[repo_name].insert_many(to_json(data))
 
     def read_codes_from_db(self, repo_name, filter=None):
-        db = self.client[repo_name]
+        db = self.mongo_client[repo_name]
         res = db.distinct('code', filter=filter)
         return res
 
@@ -156,7 +167,7 @@ class SecurityDataRepository:
         return res
 
     def read_all_data(self, repo_name):
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         cursor = coll.find({}, {'_id': 0}, batch_size=READ_BATCH_SIZE)
         return self.construct_dataframe(cursor)
 
@@ -182,14 +193,14 @@ class SecurityDataRepository:
         }
         if extra_filter is not None:
             query.update(extra_filter)
-        coll = self.client[repo_name]
+        coll = self.mongo_client[repo_name]
         cursor = coll.find(query, {"_id": 0, 'update_time': 0, 'date_stamp': 0}, batch_size=READ_BATCH_SIZE)
         return self.construct_dataframe(cursor)
 
     def read_max_date_for(
             self, code, repo_name
             ):
-        repo = self.client[repo_name]
+        repo = self.mongo_client[repo_name]
         cnt = repo.count_documents({'code': code})
         if cnt < 1:
             return None
@@ -197,13 +208,13 @@ class SecurityDataRepository:
         return end[0:10]
 
     def remove_all_from(self, repo_name, query=None):
-        repo = self.client[repo_name]
+        repo = self.mongo_client[repo_name]
         if query is None:
             repo.drop()
         else:
             repo.remove(query)
 
     def drop(self, repo_name):
-        repo = self.client[repo_name]
+        repo = self.mongo_client[repo_name]
         repo.drop()
 

@@ -30,8 +30,8 @@ class Strategy:
         self._buy_strategy: BuyStrategy = None
         self._sell_strategy: SellStrategy = None
         self._backtester: Backtester = None
-        self._trade_scanner: TradeScanner = None
-        self._candidates_updater = MasterIndicatorService(self._name, self._main_factor.calculate_function)
+        self._trade_candidates_scanner: TradeScanner = None
+        self._main_factor_updater = MasterIndicatorService(self._name, self._main_factor.calculate_function)
         self._auto_save = False
 
     def load(self, name):
@@ -40,23 +40,52 @@ class Strategy:
     def save(self):
         pass
 
-    def set_auto_save(self, auto_save: bool):
-        self._auto_save = auto_save
+    def setAutoSave(self, autoSave: bool):
+        self._auto_save = autoSave
 
-    def run_backtest(self):
+    def backtest(self):
         self._backtester.run()
 
-    def scan_trade_candidates(self, day: Date):
-        self._trade_scanner.scan(day)
+    def scanTradeCandidates(self, day: Date):
+        self._trade_candidates_scanner.scan(day)
 
-    def set_name(self, name):
+    def setName(self, name):
         self._name = name
+        return self
+    
+    def setBuyStrategy(self, buyStrategy):
+        self._buy_strategy = buyStrategy
+        return self
+    
+    def setSellStrategy(self, sellStrategy: SellStrategy):
+        self._sell_strategy = sellStrategy
+        return self
+    
+    def setBacktester(self, backtester: Backtester):
+        self._backtester = backtester
+        return self
+    
+    def setTradeCandidatesScanner(self, tradeCandidatesScanner: TradeScanner):
+        self._trade_candidates_scanner = tradeCandidatesScanner
+        return self
 
-    def set_main_factor(self, factor: Factor):
+    def setMainFactor(self, factor: Factor):
         self._main_factor = factor
 
-    def add_factor(self, factor: Factor):
+    def addSecondaryFactor(self, factor: Factor):
         self._factors.append(factor)
 
-    def init_main_factor_candidates(self):
-        self._candidates_updater.recreate_for_all_codes()
+    def initMainFactorCandidates(self, codes=None):
+        if codes is None:
+            self._main_factor_updater.recreate_for_all_codes()
+        else:
+            print("Not supported")
+
+    def updateMainFactorCandidates(self, fromDate: Date=None, codes=None):
+        if codes is None:
+            self._main_factor_updater.update_for_all_codes()
+        else:
+            print("Not supported")
+
+    def getCandidates(self, day: Date):
+        return None

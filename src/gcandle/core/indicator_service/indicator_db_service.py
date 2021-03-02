@@ -14,6 +14,11 @@ class IndicatorDBService:
     def __init__(self, name: str, freq: SeFreq):
         self.name = name
         self.freq = freq
+        self.databaseName = None
+
+    def set_databaseName(self, databaseName):
+        self.databaseName = databaseName
+        return self
 
     def replace_by_dates(self, data, code, start, end):
         DB_CLIENT.delete_by_code_and_dates(self.repo_name(), code, start, end)

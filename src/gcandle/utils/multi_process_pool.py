@@ -1,11 +1,12 @@
 from multiprocessing import Pool
 from gcandle.objects.basic_objects import DB_CLIENT
+from gcandle.objects.basic_objects import SEC_DATA_REPO
 from time import time
 
 DEFAULT_POOL_SIZE = 8
 
 def pool_init():
-    DB_CLIENT.init()
+    SEC_DATA_REPO.client.init()
 
 
 def execute_tasks(code_list, task_func, *args):
