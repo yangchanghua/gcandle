@@ -89,3 +89,11 @@ class MasterIndicatorDB:
         end = date_time_utils.Date.from_str(end)
         executor.execute_tasks(code_list, self.update_for_single_code, start.as_str(), end.as_str())
 
+
+    def recreate_for_codes(self, codes, start_date, end):
+        DB_CLIENT.remove_by_codes_from(self.repo_name_for_backtest(), codes)
+        DB_CLIENT.remove_by_codes_from(self.repo_name_for_trade(), codes)
+        start = date_time_utils.Date.from_str(start_date)
+        end = date_time_utils.Date.from_str(end)
+        executor.execute_tasks(codes, self.update_for_single_code, start.as_str(), end.as_str())
+
