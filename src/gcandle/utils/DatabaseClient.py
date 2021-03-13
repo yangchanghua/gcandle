@@ -224,6 +224,14 @@ class DatabaseClient:
         end = repo.find({'code': code}, {'date': 1, '_id': 0}).sort('date', pymongo.DESCENDING).limit(1)[0]['date']
         return end[0:10]
 
+    def remove_by_codes_from(self, repo_name, codes):
+        query = {
+            'code': {'$in': codes}
+        }
+        self.ensure_client()
+        repo = self.client[repo_name]
+        repo.remove(query)
+
     def remove_all_from(self, repo_name, query=None):
         self.ensure_client()
         repo = self.client[repo_name]

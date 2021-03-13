@@ -73,6 +73,15 @@ class MasterIndicatorService:
         for service in self.slave_services:
             service.update_all_codes(codes)
 
+    def recreate_for_specified_codes(self, codes, start=DEFAULT_START_CREATE_DATE, end=None):
+        if end is None:
+            end = Date().as_str()
+        self.repo.recreate_for_codes(codes, start, end)
+        print("{} master indicator recreate done".format(self.name))
+        for service in self.slave_services:
+            service.recreate_all_codes(codes, start, end)
+            print("{} slave indicator recreate done".format(service.repo_name()))
+
     def recreate_for_all_codes(self, start=DEFAULT_START_CREATE_DATE, end=None):
         if self.user_confirm_to_continue():
             if end is None:
