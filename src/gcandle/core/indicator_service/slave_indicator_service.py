@@ -2,7 +2,7 @@ import gcandle.utils.date_time_utils as date_time_utils
 import gcandle.utils.multi_process_pool as executor
 from gcandle.objects.basic_objects import DB_CLIENT
 from gcandle.objects.data_service_objects import SECURITY_DATA_READ_SERVICE
-
+import numpy as np
 
 FP_FEATURE_REPO_NAME_PREFIX = 'fp_features_'
 fpds = [20, 50, 120]
@@ -12,10 +12,16 @@ MIN_CREATE_DATE = '2006-01-01'
 class SlaveIndicatorService:
     def __init__(self, master_service=None):
         self.master_service = master_service
+        self.days_to_keep = 1
+        self.columns_to_shift = {}
 
     def set_master(self, master):
         self.master_service = master
         return self
+
+    def set_days_to_keep(self, days):
+        if days > 0:
+            self.days_to_keep = days
 
     def save(self, data):
         if data is not None and len(data) > 0:
@@ -49,6 +55,9 @@ class SlaveIndicatorService:
             return
         master_key = self.master_service.get_key()
         data[master_key] = master_data[master_key]
+        if self.days_to_keep > 1:
+            data.loc[data[master_key] == False, master_key] = np.nan
+            data[master_key] = data[master_key].fillna(method="ffill", limit=self.days_to_keep - 1)
         data = data.loc[data[master_key] == True]
         data.drop(columns=[master_key], inplace=True)
         if data is not None and data.shape[0] > 0:
