@@ -28,4 +28,5 @@ def fetch_and_update_by_tdx():
 
 
 if __name__ == '__main__':
-    fetch_and_update_by_tdx()
+    # fetch_and_update_by_tdx()
+    pass

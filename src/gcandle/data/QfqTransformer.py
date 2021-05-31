@@ -69,7 +69,8 @@ def init_qfq_repo():
 
 if __name__=="__main__":
     # recreate_stock_qfq_data()
-    update_stock_qfq_data()
+    # update_stock_qfq_data()
     # update_qfq_for_single_code('300831', '2006-01-01', date_time_utils.Date().as_str())
+    pass
 
 

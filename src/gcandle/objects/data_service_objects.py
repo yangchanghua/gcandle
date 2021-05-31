@@ -1,4 +1,4 @@
-from gcandle.data.csv.CsvSecurityFetcher import CsvSecurityFetcher
+from gcandle.data.csv_data.CsvSecurityFetcher import CsvSecurityFetcher
 from gcandle.data.tdx.TdxSecurityFetcher import TdxSecurityFetcher
 from gcandle.data.SecurityDataService import SecurityDataService
 

@@ -15,7 +15,7 @@ def recreate_all_foot_peak_marks():
 
 
 if __name__=="__main__":
-    recreate_all_foot_peak_marks()
+    # recreate_all_foot_peak_marks()
     # update_all_foot_peak_marks()
     # update_foot_peak_marks('300811', 20, '2019-01-01', '2020-07-30')
     pass
