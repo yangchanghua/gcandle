@@ -57,6 +57,12 @@ class DayBarBacktest:
         chosen_buy = self.choose_cand(buy_cand, can_buy_cnt)
         return chosen_buy, max_ratio
 
+    def choose_cand_with_fixed_ratio(self, buy_cand, hold_cnt):
+        can_buy_cnt = max(1, 3 - hold_cnt)
+        ratio = 0.33
+        chosen_buy = self.choose_cand(buy_cand, can_buy_cnt)
+        return chosen_buy, ratio
+
     def print_sell_stock(self, item):
         arr = self.get_item_attrs(item)
         print('SELL ', arr)
@@ -160,7 +166,7 @@ class DayBarBacktest:
 
         if len(buy_data) > 0:
             buy_cand_codes = buy_data.code.unique().tolist()
-            chosen_buy_codes, max_ratio = self.choose_cand_without_limit(buy_cand_codes)
+            chosen_buy_codes, max_ratio = self.choose_cand_with_fixed_ratio(buy_cand_codes, len(self.AC.sell_available))
             buy_data = buy_data.loc[buy_data.code.isin(chosen_buy_codes)].copy()
 
             price_func = self.buy_strategy.get_price_func()
@@ -214,10 +220,10 @@ class DayBarBacktest:
             print('### Total orders ###: ', his_table.shape[0] / 2)
             print(self.sell_strategy.get_history())
 
-        top = AC.max_profitable_stocks(n=20)
-        bottom = AC.max_profitable_stocks(n=-20)
+        top = AC.max_profitable_stocks(n=200)
+        bottom = AC.max_profitable_stocks(n=-200)
         f = open('{}_top_profit.html'.format(self.name), 'w')
-        print(top.T.to_html(), file=f)
+        print(top.to_html(), file=f)
         top_codes = list(top.index.values)
         print('Top profit codes: ', top_codes)
         top_hist = his_table.loc[his_table['code'].isin(top_codes), cols]
