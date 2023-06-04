@@ -50,6 +50,8 @@ class TdxSecurityFetcher(SecurityFetcher):
 
         print('total fetched rows: {}'.format(start))
         df = api.to_df(arr).assign(ex=exchange.name)
+        if len(df) < 1:
+            return None
         df = df.assign(
             stype=df.code.apply(exchange.code_to_type_str)
         ).set_index(['code', 'ex'], drop=True)
